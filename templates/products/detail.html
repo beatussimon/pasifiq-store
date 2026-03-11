@@ -53,13 +53,13 @@
         <div class="product-info">
             <div class="product-info-header">
                 {% if product.category %}
-                <a href="{{ product.category.get_absolute_url }}" class="product-category-tag">{{ product.category.name
-                    }}</a>
+                <a href="{{ product.category.get_absolute_url }}" class="product-category-tag">
+                    {{ product.category.name }}
+                </a>
                 {% endif %}
                 <div class="product-badges-detail">
                     {% if product.is_featured %}<span class="badge-featured">⭐ Featured</span>{% endif %}
-                    <span class="badge-condition badge-{{ product.condition }}">{{ product.get_condition_display
-                        }}</span>
+                    <span class="badge-condition badge-{{ product.condition }}">{{ product.get_condition_display }}</span>
                     <span class="badge-status badge-status-{{ product.status }}">{{ product.get_status_display }}</span>
                 </div>
             </div>

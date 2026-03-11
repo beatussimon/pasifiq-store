@@ -1,28 +1,75 @@
 {% extends 'base.html' %}
 {% block title %}Search: {{ query }} — {{ store_name }}{% endblock %}
+
 {% block content %}
 <div class="container">
-<div class="search-page">
-<div class="search-hero">
-<form action="{% url 'search_app:search' %}" method="GET" class="search-form-big">
-<input type="text" name="q" value="{{ query }}" placeholder="Search products..." autofocus>
-<button type="submit" class="btn btn-primary">Search</button>
-</form>
+    <div class="page-header-boutique">
+        <div class="header-main-row">
+            <div class="header-text-group">
+                <nav class="breadcrumb-nav">
+                    <a href="{% url 'core:home' %}">Home</a>
+                    <span class="sep">•</span>
+                    <span class="current">Search</span>
+                </nav>
+                <h1>Search Results</h1>
+                <p>Showing results for "{{ query }}"</p>
+            </div>
+            <div class="header-info-group">
+                <div class="product-count-pill">
+                    <strong>{{ result_count }}</strong>
+                    <span>Matches</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-hero" style="margin-bottom: 30px;">
+        <form action="{% url 'search_app:search' %}" method="GET" class="search-form-big"
+            style="display:flex; max-width:600px; margin:0 auto; gap:10px;">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search products..." autofocus
+                class="form-control" style="flex:1;">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    {% if query %}
+    <div class="products-layout">
+        <!-- Sidebar Filters as Horizontal Pills -->
+        <div class="search-filters-bar"
+            style="grid-column: 1 / -1; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+            <div class="filter-group" style="display: flex; align-items: center; gap: 16px;">
+                <label style="font-weight: 600; font-family: var(--font-display);">Sort By:</label>
+                <div class="filter-pills" style="display: flex; gap: 8px;">
+                    <a href="?q={{ query }}&sort=relevance"
+                        class="filter-pill {% if sort == 'relevance' or not sort %}active{% endif %}"
+                        style="text-decoration: none;">Relevance</a>
+                    <a href="?q={{ query }}&sort=newest" class="filter-pill {% if sort == 'newest' %}active{% endif %}"
+                        style="text-decoration: none;">Newest</a>
+                    <a href="?q={{ query }}&sort=popular"
+                        class="filter-pill {% if sort == 'popular' %}active{% endif %}"
+                        style="text-decoration: none;">Most Popular</a>
+                </div>
+            </div>
+        </div>
+
+        {% if products %}
+        <!-- Products Grid -->
+        <div class="products-main" style="grid-column: 1 / -1;">
+            <div class="products-grid">
+                {% for product in products %}
+                {% include 'partials/product_card.html' with product=product %}
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">🔍</div>
+            <h3>No results found</h3>
+            <p>Try different keywords.</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
-{% if query %}
-<div class="search-results-header">
-<span>{{ result_count }} result{{ result_count|pluralize }} for "{{ query }}"</span>
-<div class="search-filters">
-<select name="sort" onchange="window.location.href='?q={{ query }}&sort='+this.value">
-<option value="relevance" {% if sort == 'relevance' %}selected{% endif %}>Relevance</option>
-<option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
-<option value="popular" {% if sort == 'popular' %}selected{% endif %}>Most Popular</option>
-</select>
-</div></div>
-{% if products %}
-<div class="products-grid">{% for product in products %}{% include 'partials/product_card.html' with product=product %}{% endfor %}</div>
-{% else %}
-<div class="empty-state"><div class="empty-icon">🔍</div><h3>No results found</h3><p>Try different keywords.</p></div>
-{% endif %}
-{% endif %}
-</div></div>{% endblock %}
+{% endblock %}

@@ -5,100 +5,146 @@
 
 {% block content %}
 <div class="container">
-    <div class="page-header-boutique">
-        <div class="header-main-row">
-            <div class="header-text-group">
-                <nav class="breadcrumb-nav">
-                    <a href="{% url 'core:home' %}">Home</a>
-                    <span class="sep">•</span>
-                    <span class="current">Products</span>
-                </nav>
-                <h1>All Products</h1>
-                <p>A curated selection of premium merchandise.</p>
-            </div>
-            <div class="header-info-group">
-                <div class="product-count-pill">
-                    <strong>{{ products.paginator.count }}</strong>
-                    <span>Merchandise</span>
-                </div>
-            </div>
-        </div>
-    </div>
+ <div class="page-header-boutique">
+ <div class="header-main-row">
+ <div class="header-text-group">
+ <nav class="breadcrumb-nav">
+ <a href="{% url 'core:home' %}">Home</a>
+ <span class="sep">•</span>
+ <span class="current">Products</span>
+ </nav>
+ <h1>All Products</h1>
+ <p>A curated selection of premium merchandise.</p>
+ </div>
+ <div class="header-info-group">
+ <div class="product-count-pill">
+ <strong>{{ products.paginator.count }}</strong>
+ <span>Merchandise</span>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <div class="products-layout">
-        <!-- Sidebar Filters -->
-        <aside class="filter-sidebar">
-            <h3>Filters</h3>
-            <form method="GET" id="filterForm">
-                <div class="filter-group">
-                    <label>Condition</label>
-                    <div class="filter-pills">
-                        <label class="filter-pill"><input type="radio" name="condition" value="" {% if not selected_condition %}checked{% endif %} onchange="this.form.submit()"><span>All</span></label>
-                        <label class="filter-pill"><input type="radio" name="condition" value="new" {% if selected_condition == 'new' %}checked{% endif %} onchange="this.form.submit()"><span>New</span></label>
-                        <label class="filter-pill"><input type="radio" name="condition" value="used" {% if selected_condition == 'used' %}checked{% endif %} onchange="this.form.submit()"><span>Used</span></label>
-                        <label class="filter-pill"><input type="radio" name="condition" value="refurbished" {% if selected_condition == 'refurbished' %}checked{% endif %} onchange="this.form.submit()"><span>Refurbished</span></label>
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label>Availability</label>
-                    <div class="filter-pills">
-                        <label class="filter-pill"><input type="radio" name="status" value="" {% if not selected_status %}checked{% endif %} onchange="this.form.submit()"><span>All</span></label>
-                        <label class="filter-pill"><input type="radio" name="status" value="available" {% if selected_status == 'available' %}checked{% endif %} onchange="this.form.submit()"><span>Available</span></label>
-                        <label class="filter-pill"><input type="radio" name="status" value="sold" {% if selected_status == 'sold' %}checked{% endif %} onchange="this.form.submit()"><span>Sold</span></label>
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label>Sort By</label>
-                    <select name="sort" onchange="this.form.submit()">
-                        <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First</option>
-                        <option value="view_count" {% if sort == 'view_count' %}selected{% endif %}>Most Viewed</option>
-                        <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Highest Rated</option>
-                        <option value="wishlist" {% if sort == 'wishlist' %}selected{% endif %}>Most Wished</option>
-                        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
-                        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
-                        <option value="name" {% if sort == 'name' %}selected{% endif %}>Name A-Z</option>
-                    </select>
-                </div>
-                {% if selected_category or selected_condition or selected_status %}
-                <a href="{% url 'products:list' %}" class="btn btn-outline btn-sm">Clear Filters</a>
-                {% endif %}
-            </form>
-        </aside>
+ <div class="products-layout" style="display: block;">
+ <!-- Top Filters Bar -->
+ <div class="filters-top-bar"
+ style="background: var(--bg-card); padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 32px; box-shadow: var(--shadow-sm);">
+ <form method="GET" id="filterForm"
+ style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end;">
+ <!-- Condition Filters -->
+ <div class="filter-group" style="flex: 1; min-width: 250px;">
+ <label
+ style="display: block; font-family: var(--font-display); font-weight: 700; color: var(--text-main); margin-bottom: 12px; font-size: 15px;">Condition</label>
+ <div class="filter-pills" style="display: flex; flex-wrap: wrap; gap: 8px;">
+ <label class="filter-pill">
+ <input type="radio" name="condition" value="" {% if not selected_condition %}checked{% endif %} onchange="this.form.submit()">
+ <span>All</span>
+ </label>
+ <label class="filter-pill">
+ <input type="radio" name="condition" value="new" {% if selected_condition == 'new' %}checked{% endif %} onchange="this.form.submit()">
+ <span>New</span>
+ </label>
+ <label class="filter-pill">
+ <input type="radio" name="condition" value="used" {% if selected_condition == 'used' %}checked{% endif %} onchange="this.form.submit()">
+ <span>Used</span>
+ </label>
+ <label class="filter-pill">
+ <input type="radio" name="condition" value="refurbished" {% if selected_condition == 'refurbished' %}checked{% endif %} onchange="this.form.submit()">
+ <span>Refurbished</span>
+ </label>
+ </div>
+ </div>
 
-        <!-- Products Grid -->
-        <div class="products-main">
-            <div class="products-toolbar">
-                <span class="results-count">{{ products.paginator.count }} product{{ products.paginator.count|pluralize }}</span>
-            </div>
-            {% if products %}
-            <div class="products-grid">
-                {% for product in products %}
-                {% include 'partials/product_card.html' with product=product %}
-                {% endfor %}
-            </div>
-            <!-- Pagination -->
-            {% if products.has_other_pages %}
-            <div class="pagination">
-                {% if products.has_previous %}
-                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_condition %}condition={{ selected_condition }}&{% endif %}sort={{ sort }}&page={{ products.previous_page_number }}" class="page-btn">← Prev</a>
-                {% endif %}
-                {% for num in products.paginator.page_range %}
-                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ sort }}&page={{ num }}" class="page-btn {% if products.number == num %}active{% endif %}">{{ num }}</a>
-                {% endfor %}
-                {% if products.has_next %}
-                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ sort }}&page={{ products.next_page_number }}" class="page-btn">Next →</a>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% else %}
-            <div class="empty-state">
-                <div class="empty-icon">🛍️</div>
-                <h3>No products found</h3>
-                <p>Try adjusting your filters or browse all products.</p>
-                <a href="{% url 'products:list' %}" class="btn btn-primary">View All</a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+ <!-- Availability Filters -->
+ <div class="filter-group" style="flex: 1; min-width: 200px;">
+ <label
+ style="display: block; font-family: var(--font-display); font-weight: 700; color: var(--text-main); margin-bottom: 12px; font-size: 15px;">Availability</label>
+ <div class="filter-pills" style="display: flex; flex-wrap: wrap; gap: 8px;">
+ <label class="filter-pill">
+ <input type="radio" name="status" value="" {% if not selected_status %}checked{% endif %}
+ onchange="this.form.submit()">
+ <span>All</span>
+ </label>
+ <label class="filter-pill">
+ <input type="radio" name="status" value="available" {% if selected_status == 'available' %}checked{% endif %} onchange="this.form.submit()">
+ <span>Available</span>
+ </label>
+ <label class="filter-pill">
+ <input type="radio" name="status" value="sold" {% if selected_status == 'sold' %}checked{% endif %} onchange="this.form.submit()">
+ <span>Sold</span>
+ </label>
+ </div>
+ </div>
+
+ <!-- Sort Dropdown -->
+ <div class="filter-group" style="flex: 1; min-width: 200px;">
+ <label
+ style="display: block; font-family: var(--font-display); font-weight: 700; color: var(--text-main); margin-bottom: 12px; font-size: 15px;">Sort
+ By</label>
+ <select name="sort" onchange="this.form.submit()" class="form-control"
+ style="width: 100%; border-radius: var(--radius-full); padding: 10px 16px; min-height: 44px;">
+ <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First
+ </option>
+ <option value="view_count" {% if sort == 'view_count' %}selected{% endif %}>Most Viewed</option>
+ <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+ <option value="wishlist" {% if sort == 'wishlist' %}selected{% endif %}>Most Wished</option>
+ <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High
+ </option>
+ <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low
+ </option>
+ <option value="name" {% if sort == 'name' %}selected{% endif %}>Name A-Z</option>
+ </select>
+ </div>
+
+ {% if selected_category or selected_condition or selected_status %}
+ <div class="filter-group"
+ style="display: flex; align-items: center; justify-content: center; min-height: 44px;">
+ <a href="{% url 'products:list' %}" class="btn btn-outline"
+ style="border-radius: var(--radius-full); padding: 8px 24px; white-space: nowrap;">Clear
+ Filters</a>
+ </div>
+ {% endif %}
+ </form>
+ </div>
+
+ <!-- Products Grid -->
+ <div class="products-main">
+ <div class="products-toolbar">
+ <span class="results-count">{{ products.paginator.count }} product{{ products.paginator.count|pluralize
+ }}</span>
+ </div>
+ {% if products %}
+ <div class="products-grid">
+ {% for product in products %}
+ {% include 'partials/product_card.html' with product=product %}
+ {% endfor %}
+ </div>
+ <!-- Pagination -->
+ {% if products.has_other_pages %}
+ <div class="pagination">
+ {% if products.has_previous %}
+ <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_condition %}condition={{ selected_condition }}&{% endif %}sort={{ sort }}&page={{ products.previous_page_number }}"
+ class="page-btn">← Prev</a>
+ {% endif %}
+ {% for num in products.paginator.page_range %}
+ <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ sort }}&page={{ num }}"
+ class="page-btn {% if products.number == num %}active{% endif %}">{{ num }}</a>
+ {% endfor %}
+ {% if products.has_next %}
+ <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ sort }}&page={{ products.next_page_number }}"
+ class="page-btn">Next →</a>
+ {% endif %}
+ </div>
+ {% endif %}
+ {% else %}
+ <div class="empty-state">
+ <div class="empty-icon">🛍️</div>
+ <h3>No products found</h3>
+ <p>Try adjusting your filters or browse all products.</p>
+ <a href="{% url 'products:list' %}" class="btn btn-primary">View All</a>
+ </div>
+ {% endif %}
+ </div>
+ </div>
 </div>
 {% endblock %}

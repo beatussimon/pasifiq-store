@@ -132,8 +132,9 @@
                 {% get_nav_categories as nav_cats %}
                 {% for cat in nav_cats %}
                 <a href="{{ cat.get_absolute_url }}"
-                    class="category-nav-link {% if selected_category == cat.slug or category.slug == cat.slug %}active{% endif %}">{{
-                    cat.name }}</a>
+                    class="category-nav-link {% if selected_category == cat.slug or category.slug == cat.slug %}active{% endif %}">
+                    {{ cat.name }}
+                </a>
                 {% endfor %}
                 <a href="{% url 'products:list' %}?status=available"
                     class="category-nav-link {% if request.GET.status == 'available' %}active{% endif %}">Available</a>
@@ -202,8 +203,7 @@
                         <div class="logo-icon">🌊</div>
                         <div class="logo-text">{{ store_name }}</div>
                     </a>
-                    <p class="footer-desc">{{ store_tagline|default:'Quality Pacific products delivery at your
-                        doorstep.' }}</p>
+                    <p class="footer-desc">{{ store_tagline|default:'Quality Pacific products delivery at your doorstep.' }}</p>
                     <div class="footer-social">
                         <a href="#" class="social-btn">FB</a>
                         <a href="#" class="social-btn">IG</a>
