@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ store_name }} — Premium Products{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+{% if site_settings.hero_image %}
+<section class="hero"
+    style="background-image: linear-gradient(rgba(15, 31, 61, 0.7), rgba(15, 31, 61, 0.7)), url('{{ site_settings.hero_image.url }}');">
+    {% else %}
+    <section class="hero">
+        {% endif %}
+        <div class="hero-bg-accent"></div>
+        <div class="hero-container">
+            <h1 class="hero-title">Discover Extraordinary Merchandise</h1>
+            <p class="hero-desc">Quality merchandise from the heart of the Pacific Islands. Browse our curated
+                collection
+                and connect with us directly for the best deals.</p>
+            <div class="hero-cta">
+                <a href="{% url 'products:list' %}" class="hero-btn">Shop Collection</a>
+                <a href="{% url 'core:contact' %}" class="hero-btn hero-btn-outline">Contact Us</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    {% if categories %}
+    <section class="section categories-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Browse Categories</h2>
+            </div>
+            <div class="category-pill-grid">
+                {% for category in categories %}
+                <a href="{{ category.get_absolute_url }}" class="category-pill">
+                    <span class="pill-name">{{ category.name }}</span>
+                    <span class="pill-count">{{ category.product_count }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Featured Products -->
+    {% if featured_products %}
+    <section class="section featured-section">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <span class="section-badge">⭐ Featured</span>
+                    <h2 class="section-title">Featured Products</h2>
+                </div>
+                <a href="{% url 'products:list' %}" class="section-link">View All →</a>
+            </div>
+            <div class="products-grid">
+                {% for product in featured_products %}
+                {% include 'partials/product_card.html' with product=product %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Latest Products -->
+    {% if latest_products %}
+    <section class="section latest-section">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <span class="section-badge">🆕 New</span>
+                    <h2 class="section-title">Latest Arrivals</h2>
+                </div>
+                <a href="{% url 'products:list' %}?sort=-created_at" class="section-link">View All →</a>
+            </div>
+            <div class="products-grid">
+                {% for product in latest_products %}
+                {% include 'partials/product_card.html' with product=product %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Popular Products -->
+    {% if popular_products %}
+    <section class="section popular-section">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <span class="section-badge">🔥 Popular</span>
+                    <h2 class="section-title">Most Popular</h2>
+                </div>
+                <a href="{% url 'products:list' %}?sort=view_count" class="section-link">View All →</a>
+            </div>
+            <div class="products-grid">
+                {% for product in popular_products %}
+                {% include 'partials/product_card.html' with product=product %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Find Your Perfect Product?</h2>
+                <p>Contact us directly — we're here to help you find exactly what you need.</p>
+                <div class="cta-buttons">
+                    <a href="tel:{{ store_phone }}" class="btn btn-primary btn-lg">📞 Call Now</a>
+                    <a href="#" class="btn btn-whatsapp btn-lg" id="whatsappCTA">💬 WhatsApp</a>
+                    <a href="{% url 'core:contact' %}" class="btn btn-outline btn-lg">Send Message</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% endblock %}

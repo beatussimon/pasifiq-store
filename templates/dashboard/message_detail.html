@@ -1,0 +1,42 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Message from {{ message.sender_name }}{% endblock %}
+{% block page_title %}Message Detail{% endblock %}
+
+{% block content %}
+<div class="panel message-detail-panel">
+    <div class="message-detail-header">
+        <div>
+            <h2>{{ message.sender_name }}</h2>
+            <div class="message-contact-info">
+                <a href="tel:{{ message.sender_phone }}" class="contact-link">📞 {{ message.sender_phone }}</a>
+                {% if message.sender_email %}<a href="mailto:{{ message.sender_email }}" class="contact-link">✉️ {{ message.sender_email }}</a>{% endif %}
+            </div>
+        </div>
+        <div class="message-detail-actions">
+            <a href="tel:{{ message.sender_phone }}" class="btn btn-primary">📞 Call</a>
+            <a href="{{ message.get_whatsapp_reply_url }}" target="_blank" class="btn btn-whatsapp">💬 WhatsApp Reply</a>
+            <a href="{% url 'dashboard:archive_message' message.pk %}" class="btn btn-outline">Archive</a>
+            <a href="{% url 'dashboard:message_list' %}" class="btn btn-outline">← Back</a>
+        </div>
+    </div>
+
+    {% if message.product %}
+    <div class="message-product-card">
+        <strong>Re: </strong>
+        <a href="{{ message.product.get_absolute_url }}" target="_blank">{{ message.product.name }}</a>
+        {% if message.product.price %} — TZS {{ message.product.price|floatformat:0 }}{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="message-body">
+        {% if message.subject %}<h4>{{ message.subject }}</h4>{% endif %}
+        <div class="message-content">{{ message.content|linebreaks }}</div>
+    </div>
+
+    <div class="message-meta">
+        <span>Received: {{ message.created_at|date:"F d, Y H:i" }}</span>
+        <span>Status: {{ message.get_status_display }}</span>
+        {% if message.read_at %}<span>Read: {{ message.read_at|date:"F d, Y H:i" }}</span>{% endif %}
+    </div>
+</div>
+{% endblock %}

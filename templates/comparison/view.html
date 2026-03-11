@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+{% block title %}Compare Products — {{ store_name }}{% endblock %}
+{% block content %}
+<div class="container comparison-page">
+<div class="page-header"><h1>Product Comparison</h1>
+{% if comparison_products %}<a href="{% url 'comparison:clear' %}" class="btn btn-outline btn-sm">Clear All</a>{% endif %}
+</div>
+{% if comparison_products %}
+<div class="comparison-table-wrap">
+<table class="comparison-table">
+<thead><tr><th>Feature</th>{% for p in comparison_products %}<th><div class="comp-product-header">{% if p.primary_image %}<img src="{{ p.primary_image.image.url }}" alt="{{ p.name }}">{% endif %}<span>{{ p.name }}</span><a href="{% url 'comparison:remove' p.pk %}" class="comp-remove">✕ Remove</a></div></th>{% endfor %}</tr></thead>
+<tbody>
+<tr><td>Category</td>{% for p in comparison_products %}<td>{{ p.category.name|default:"—" }}</td>{% endfor %}</tr>
+<tr><td>Condition</td>{% for p in comparison_products %}<td><span class="badge-condition badge-{{ p.condition }}">{{ p.get_condition_display }}</span></td>{% endfor %}</tr>
+<tr><td>Status</td>{% for p in comparison_products %}<td><span class="badge-status badge-status-{{ p.status }}">{{ p.get_status_display }}</span></td>{% endfor %}</tr>
+<tr><td>Price</td>{% for p in comparison_products %}<td>{% if p.price %}<strong>TZS {{ p.price|floatformat:0 }}</strong>{% else %}Contact for price{% endif %}</td>{% endfor %}</tr>
+<tr><td>Rating</td>{% for p in comparison_products %}<td>{% if p.average_rating > 0 %}<div class="stars-mini" style="--rating:{{ p.average_rating }}">★★★★★</div> {{ p.average_rating }}/5{% else %}No ratings{% endif %}</td>{% endfor %}</tr>
+<tr><td>Views</td>{% for p in comparison_products %}<td>{{ p.view_count }}</td>{% endfor %}</tr>
+{% for spec in all_specs %}<tr><td>{{ spec }}</td>{% for p in comparison_products %}<td>{{ p.specifications|get_dict_item:spec|default:"—" }}</td>{% endfor %}</tr>{% endfor %}
+<tr><td>Action</td>{% for p in comparison_products %}<td><a href="{{ p.get_absolute_url }}" class="btn btn-primary btn-sm">View</a></td>{% endfor %}</tr>
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-icon">⚖️</div><h3>No products to compare</h3><p>Add products to comparison from product pages.</p><a href="{% url 'products:list' %}" class="btn btn-primary">Browse Products</a></div>
+{% endif %}
+</div>{% endblock %}

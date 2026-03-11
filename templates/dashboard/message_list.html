@@ -1,0 +1,41 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Messages{% endblock %}
+{% block page_title %}Messages{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <div class="panel-header">
+        <div class="message-status-tabs">
+            <a href="?" class="status-tab {% if not status_filter %}active{% endif %}">All ({{ messages.paginator.count }})</a>
+            <a href="?status=new" class="status-tab {% if status_filter == 'new' %}active{% endif %}">New ({{ new_count }})</a>
+            <a href="?status=read" class="status-tab {% if status_filter == 'read' %}active{% endif %}">Read</a>
+            <a href="?status=archived" class="status-tab {% if status_filter == 'archived' %}active{% endif %}">Archived</a>
+        </div>
+    </div>
+    <div class="message-list">
+        {% for msg in messages %}
+        <a href="{% url 'dashboard:message_detail' msg.pk %}" class="message-item {% if msg.status == 'new' %}unread{% endif %}">
+            <div class="message-item-header">
+                <span class="message-sender-name">{{ msg.sender_name }}</span>
+                <span class="message-phone">📞 {{ msg.sender_phone }}</span>
+                {% if msg.sender_email %}<span class="message-email">✉️ {{ msg.sender_email }}</span>{% endif %}
+                <span class="message-date">{{ msg.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+            {% if msg.product %}
+            <div class="message-product-ref">Re: {{ msg.product.name }}</div>
+            {% endif %}
+            <div class="message-preview-text">{{ msg.content|truncatechars:120 }}</div>
+            <div class="message-item-footer">
+                <span class="status-badge status-{{ msg.status }}">{{ msg.get_status_display }}</span>
+                <div class="message-quick-actions">
+                    <a href="tel:{{ msg.sender_phone }}" onclick="event.stopPropagation()">📞 Call</a>
+                    <a href="{{ msg.get_whatsapp_reply_url }}" target="_blank" onclick="event.stopPropagation()">💬 WhatsApp</a>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <div class="panel-empty">No messages found.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

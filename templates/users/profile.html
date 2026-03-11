@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Profile — {{ store_name }}{% endblock %}
+{% block content %}
+<div class="container profile-page">
+<div class="profile-header">
+<div class="profile-avatar">{% if request.user.avatar %}<img src="{{ request.user.avatar.url }}" alt="">{% else %}<div class="avatar-placeholder">{{ request.user.username.0|upper }}</div>{% endif %}</div>
+<div class="profile-info"><h1>{{ request.user.get_full_name|default:request.user.username }}</h1><p>{{ request.user.email }}</p><a href="{% url 'users:profile_edit' %}" class="btn btn-outline btn-sm">Edit Profile</a></div>
+</div>
+<div class="profile-sections">
+<h3>Recent Wishlist</h3>
+<div class="products-grid products-grid-sm">{% for item in wishlist_items %}{% include 'partials/product_card.html' with product=item.product %}{% empty %}<p>Empty. <a href="{% url 'products:list' %}">Browse</a></p>{% endfor %}</div>
+<h3>My Inquiries</h3>
+{% for inquiry in inquiries %}<div class="inquiry-item"><span>{% if inquiry.product %}<strong>{{ inquiry.product.name }}</strong> — {% endif %}{{ inquiry.content|truncatechars:80 }}</span><span>{{ inquiry.created_at|date:"M d, Y" }}</span></div>{% empty %}<p>No inquiries yet.</p>{% endfor %}
+</div></div>{% endblock %}

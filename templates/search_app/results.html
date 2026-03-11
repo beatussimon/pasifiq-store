@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Search: {{ query }} — {{ store_name }}{% endblock %}
+{% block content %}
+<div class="container">
+<div class="search-page">
+<div class="search-hero">
+<form action="{% url 'search_app:search' %}" method="GET" class="search-form-big">
+<input type="text" name="q" value="{{ query }}" placeholder="Search products..." autofocus>
+<button type="submit" class="btn btn-primary">Search</button>
+</form>
+</div>
+{% if query %}
+<div class="search-results-header">
+<span>{{ result_count }} result{{ result_count|pluralize }} for "{{ query }}"</span>
+<div class="search-filters">
+<select name="sort" onchange="window.location.href='?q={{ query }}&sort='+this.value">
+<option value="relevance" {% if sort == 'relevance' %}selected{% endif %}>Relevance</option>
+<option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+<option value="popular" {% if sort == 'popular' %}selected{% endif %}>Most Popular</option>
+</select>
+</div></div>
+{% if products %}
+<div class="products-grid">{% for product in products %}{% include 'partials/product_card.html' with product=product %}{% endfor %}</div>
+{% else %}
+<div class="empty-state"><div class="empty-icon">🔍</div><h3>No results found</h3><p>Try different keywords.</p></div>
+{% endif %}
+{% endif %}
+</div></div>{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }} — {{ store_name }}{% endblock %}
+{% block content %}
+<div class="container">
+<nav class="breadcrumb"><a href="/">Home</a><span>›</span><a href="{% url 'categories:list' %}">Categories</a><span>›</span><span>{{ category.name }}</span></nav>
+<div class="page-header">
+    <div class="page-header-container">
+        <h1>{{ category.name }}</h1>
+        {% if category.description %}<p style="color: rgba(255,255,255,0.85)">{{ category.description }}</p>{% endif %}
+    </div>
+</div>
+{% if subcategories %}<div class="sub-categories">{% for sub in subcategories %}<a href="{{ sub.get_absolute_url }}" class="sub-cat-chip">{{ sub.name }}</a>{% endfor %}</div>{% endif %}
+<div class="products-layout">
+<aside class="filter-sidebar">
+<h3>Filters</h3>
+<form method="GET">
+<div class="filter-group"><label>Condition</label>
+<div class="filter-pills">
+<label class="filter-pill"><input type="radio" name="condition" value="" {% if not condition %}checked{% endif %} onchange="this.form.submit()"><span>All</span></label>
+<label class="filter-pill"><input type="radio" name="condition" value="new" {% if condition == 'new' %}checked{% endif %} onchange="this.form.submit()"><span>New</span></label>
+<label class="filter-pill"><input type="radio" name="condition" value="used" {% if condition == 'used' %}checked{% endif %} onchange="this.form.submit()"><span>Used</span></label>
+</div></div>
+<div class="filter-group"><label>Sort</label>
+<select name="sort" onchange="this.form.submit()">
+<option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest</option>
+<option value="-view_count" {% if sort == '-view_count' %}selected{% endif %}>Most Viewed</option>
+</select></div>
+</form>
+</aside>
+<div class="products-main">
+{% if products %}
+<div class="products-grid">{% for product in products %}{% include 'partials/product_card.html' with product=product %}{% endfor %}</div>
+{% if products.has_other_pages %}
+<div class="pagination">
+{% if products.has_previous %}<a href="?page={{ products.previous_page_number }}" class="page-btn">← Prev</a>{% endif %}
+<span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+{% if products.has_next %}<a href="?page={{ products.next_page_number }}" class="page-btn">Next →</a>{% endif %}
+</div>{% endif %}
+{% else %}<div class="empty-state"><p>No products in this category yet.</p></div>{% endif %}
+</div></div></div>{% endblock %}

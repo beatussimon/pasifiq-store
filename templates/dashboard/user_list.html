@@ -1,0 +1,25 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Users{% endblock %}
+{% block page_title %}Users{% endblock %}
+{% block content %}
+<div class="panel">
+    <div class="panel-header"><h3>Registered Users ({{ users.paginator.count }})</h3></div>
+    <table class="data-table">
+        <thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Joined</th><th>Wishlist</th><th>Active</th></tr></thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.get_full_name|default:"—" }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                <td>{{ user.wishlist_count }}</td>
+                <td>{% if user.is_active %}✅{% else %}❌{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="table-empty">No users found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

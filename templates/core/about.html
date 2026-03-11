@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}About — {{ store_name }}{% endblock %}
+{% block content %}
+<div class="container"><div class="page-content">
+<h1>About {{ store_name }}</h1>
+<p>We are a premier showcase commerce platform bringing you quality products from the Pacific Islands.</p>
+<p>Browse our curated collection and contact us directly to complete your purchase.</p>
+<div class="contact-cards">
+<div class="contact-card"><h3>📞 Call Us</h3><a href="tel:{{ store_phone }}">{{ store_phone }}</a></div>
+<div class="contact-card"><h3>💬 WhatsApp</h3><p>Message us on WhatsApp</p></div>
+<div class="contact-card"><h3>✉️ Email</h3><a href="mailto:{{ store_email }}">{{ store_email }}</a></div>
+</div>
+</div></div>{% endblock %}

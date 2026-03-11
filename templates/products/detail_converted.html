@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load core_tags %}
+
+{% block title %}{{ product.name }} — {{ store_name }}{% endblock %}
+{% block meta_description %}{{ product.short_description|default:product.description|truncatewords:20 }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/product-detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container product-detail-container">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{% url 'core:home' %}">Home</a>
+        <span>›</span>
+        <a href="{% url 'products:list' %}">Products</a>
+        {% if product.category %}
+        <span>›</span>
+        <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+        {% endif %}
+        <span>›</span>
+        <span>{{ product.name }}</span>
+    </nav>
+
+    <div class="product-detail-grid">
+        <!-- Images -->
+        <div class="product-gallery">
+            <div class="gallery-main" id="galleryMain">
+                {% if product.primary_image %}
+                <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" id="mainImage"
+                    class="gallery-main-img">
+                {% else %}
+                <div class="gallery-placeholder">🛍️</div>
+                {% endif %}
+                <div class="gallery-zoom-hint">🔍 Click to zoom</div>
+            </div>
+            {% if product.images.count > 1 %}
+            <div class="gallery-thumbs">
+                {% for image in product.images.all %}
+                <div class="gallery-thumb {% if forloop.first %}active{% endif %}"
+                    onclick="changeImage('{{ image.image.url }}', this)">
+                    <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" loading="lazy">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Details -->
+        <div class="product-info">
+            <div class="product-info-header">
+                {% if product.category %}
+                <a href="{{ product.category.get_absolute_url }}" class="product-category-tag">{{ product.category.name
+                    }}</a>
+                {% endif %}
+                <div class="product-badges-detail">
+                    {% if product.is_featured %}<span class="badge-featured">⭐ Featured</span>{% endif %}
+                    <span class="badge-condition badge-{{ product.condition }}">{{ product.get_condition_display
+                        }}</span>
+                    <span class="badge-status badge-status-{{ product.status }}">{{ product.get_status_display }}</span>
+                </div>
+            </div>
+
+            <h1 class="product-detail-title">{{ product.name }}</h1>
+
+            {% if product.average_rating > 0 %}
+            <div class="product-rating-detail">
+                <div class="stars" style="--rating: {{ product.average_rating }}">★★★★★</div>
+                <span class="rating-score">{{ product.average_rating }}/5</span>
+                <span class="rating-count">({{ product.review_count }} reviews)</span>
+                <a href="#reviews" class="rating-link">See all reviews</a>
+            </div>
+            {% endif %}
+
+            <div class="product-price-detail">
+                {% if product.price %}
+                <span class="price-main">TZS {{ product.price|floatformat:0 }}</span>
+                {% else %}
+                <span class="price-contact">Contact for Price</span>
+                {% endif %}
+            </div>
+
+            <div class="product-description">
+                {{ product.description|linebreaks }}
+            </div>
+
+            {% if product.specifications %}
+            <div class="product-specs">
+                <h3>Specifications</h3>
+                <div class="specs-grid">
+                    {% for key, value in product.specifications.items %}
+                    <div class="spec-row">
+                        <span class="spec-key">{{ key }}</span>
+                        <span class="spec-value">{{ value }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if product.location %}
+            <div class="product-location">
+                📍 {{ product.location }}
+            </div>
+            {% endif %}
+
+            {% if product.tag_list %}
+            <div class="product-tags">
+                {% for tag in product.tag_list %}
+                <a href="{% url 'search_app:search' %}?q={{ tag }}" class="tag">{{ tag }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="product-actions">
+                {% if product.is_available %}
+                <a href="tel:{{ store_phone }}" class="btn btn-primary btn-contact">
+                    📞 Call to Buy
+                </a>
+                <a href="{{ product.get_whatsapp_url }}" class="btn btn-whatsapp btn-contact" target="_blank"
+                    rel="noopener">
+                    💬 WhatsApp
+                </a>
+                {% endif %}
+                <button class="btn btn-outline"
+                    onclick="document.getElementById('inquiryForm').scrollIntoView({behavior:'smooth'})">
+                    ✉️ Send Inquiry
+                </button>
+            </div>
+
+            <div class="product-secondary-actions">
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'wishlist:toggle' product.pk %}"
+                    class="secondary-action-btn {% if in_wishlist %}active{% endif %}">
+                    <svg width="16" height="16" viewBox="0 0 24 24"
+                        fill="{% if in_wishlist %}currentColor{% else %}none{% endif %}" stroke="currentColor"
+                        stroke-width="2">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                    {% if in_wishlist %}In Wishlist{% else %}Add to Wishlist{% endif %}
+                </a>
+                <a href="{% url 'saved_items:toggle' product.pk %}"
+                    class="secondary-action-btn {% if in_saved %}active{% endif %}">
+                    <svg width="16" height="16" viewBox="0 0 24 24"
+                        fill="{% if in_saved %}currentColor{% else %}none{% endif %}" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg>
+                    {% if in_saved %}Saved{% else %}Save{% endif %}
+                </a>
+                {% endif %}
+                <a href="{% url 'comparison:add' product.pk %}"
+                    class="secondary-action-btn {% if product.pk in comparison_product_ids %}active{% endif %}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    Compare
+                </a>
+            </div>
+
+            <div class="product-meta-detail">
+                <span>👁 {{ product.view_count }} views</span>
+                <span>❤️ {{ product.wishlist_count }} wishlisted</span>
+                <span>🔄 {{ product.comparison_count }} compared</span>
+                <span>✉️ {{ product.inquiry_count }} inquiries</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inquiry Form -->
+    <div class="inquiry-section" id="inquiryForm">
+        <h2>Send an Inquiry</h2>
+        <p>Interested in this product? Send us a message and we'll get back to you shortly.</p>
+        <form method="post" action="{% url 'products:contact' product.slug %}" class="inquiry-form">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Your Name *</label>
+                    <input type="text" name="sender_name" class="form-control" required placeholder="Full name"
+                        value="{% if request.user.is_authenticated %}{{ request.user.get_full_name }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" name="sender_phone" class="form-control" required placeholder="+1 234 567 8900"
+                        value="{% if request.user.is_authenticated %}{{ request.user.phone }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>Email (optional)</label>
+                    <input type="email" name="sender_email" class="form-control" placeholder="your@email.com"
+                        value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" class="form-control"
+                        placeholder="Inquiry about {{ product.name }}" value="Inquiry about {{ product.name }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Message *</label>
+                <textarea name="content" class="form-control" required rows="4"
+                    placeholder="Hi, I'm interested in {{ product.name }}...">Hi, I'm interested in {{ product.name }}{% if product.price %} (priced at TZS {{ product.price|floatformat:0 }}){% endif %}. Could you provide more information?</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Inquiry</button>
+        </form>
+    </div>
+
+    <!-- Ratings Section -->
+    <div class="ratings-section" id="reviews">
+        <div class="ratings-header">
+            <h2>Reviews & Ratings</h2>
+            {% if product.review_count > 0 %}
+            <div class="ratings-summary">
+                <div class="rating-big">{{ product.average_rating }}</div>
+                <div class="rating-big-info">
+                    <div class="stars" style="--rating: {{ product.average_rating }}">★★★★★</div>
+                    <span>{{ product.review_count }} reviews</span>
+                </div>
+                <div class="rating-distribution">
+                    {% for score, info in rating_dist_with_pct.items %}
+                    <div class="rating-bar">
+                        <span class="rating-bar-label">{{ score }}★</span>
+                        <div class="rating-bar-track">
+                            <div class="rating-bar-fill" style="width: {{ info.pct }}%"></div>
+                        </div>
+                        <span class="rating-bar-count">{{ info.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if request.user.is_authenticated %}
+        <div class="rate-product">
+            <h3>{% if user_rating %}Update Your Rating{% else %}Rate This Product{% endif %}</h3>
+            <form method="post" action="{% url 'ratings:rate' product.pk %}" class="rating-form">
+                {% csrf_token %}
+                <div class="star-rating-input">
+                    {% for i in "54321"|make_list %}
+                    <input type="radio" name="score" id="star{{ i }}" value="{{ i }}" {% if user_rating and
+                        user_rating.score|stringformat:"s"==i %}checked{% endif %}>
+                    <label for="star{{ i }}" title="{{ i }} stars">★</label>
+                    {% endfor %}
+                </div>
+                <textarea name="review" placeholder="Write your review (optional)..."
+                    rows="3">{% if user_rating %}{{ user_rating.review }}{% endif %}</textarea>
+                <button type="submit" class="btn btn-primary">Submit Rating</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="rating-login-prompt">
+            <a href="{% url 'users:login' %}?next={{ request.path }}">Login to leave a review</a>
+        </div>
+        {% endif %}
+
+        {% if all_ratings %}
+        <div class="reviews-list">
+            {% for rating in all_ratings %}
+            <div class="review-item">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <span class="reviewer-name">{{ rating.user.get_full_name|default:rating.user.username }}</span>
+                        <div class="stars" style="--rating: {{ rating.score }}">★★★★★</div>
+                    </div>
+                    <span class="review-date">{{ rating.created_at|date:"M d, Y" }}</span>
+                </div>
+                {% if rating.review %}
+                <p class="review-text">{{ rating.review }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="related-products">
+        <h2>Related Products</h2>
+        <div class="product-grid">
+            {% for product in related_products %}
+            {% include 'partials/product_card.html' with product=product %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Image Zoom Modal -->
+<div class="zoom-modal" id="zoomModal" onclick="this.classList.remove('active')">
+    <img id="zoomImage" src="" alt="">
+    <button onclick="document.getElementById('zoomModal').classList.remove('active')">✕</button>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function changeImage(url, el) {
+        document.getElementById('mainImage').src = url;
+        document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    document.getElementById('galleryMain').addEventListener('click', function () {
+        const src = document.getElementById('mainImage').src;
+        document.getElementById('zoomImage').src = src;
+        document.getElementById('zoomModal').classList.add('active');
+    });
+</script>
+{% endblock %}

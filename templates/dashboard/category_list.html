@@ -1,0 +1,30 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Categories{% endblock %}
+{% block content %}
+<div class="panel">
+    <div class="panel-header">
+        <h3>All Categories</h3>
+        <a href="{% url 'dashboard:category_create' %}" class="btn btn-primary">+ Add Category</a>
+    </div>
+    <table class="data-table">
+        <thead><tr><th>Name</th><th>Parent</th><th>Products</th><th>Active</th><th>Actions</th></tr></thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td>{{ cat.name }}</td>
+                <td>{{ cat.parent.name|default:"—" }}</td>
+                <td>{{ cat.product_count }}</td>
+                <td>{% if cat.is_active %}✅{% else %}❌{% endif %}</td>
+                <td class="table-actions">
+                    <a href="{% url 'dashboard:category_edit' cat.pk %}" class="btn btn-xs">Edit</a>
+                    <a href="{{ cat.get_absolute_url }}" target="_blank" class="btn btn-xs btn-outline">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="table-empty">No categories. <a href="{% url 'dashboard:category_create' %}">Add one</a>.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

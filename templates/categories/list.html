@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Categories — {{ store_name }}{% endblock %}
+{% block content %}
+<div class="container">
+<div class="page-header">
+    <div class="page-header-container">
+        <h1>Browse Categories</h1>
+    </div>
+</div>
+<div class="category-grid category-grid-full">
+{% for cat in categories %}
+<a href="{{ cat.get_absolute_url }}" class="category-card">
+<div class="category-card-bg">{% if cat.image %}<img src="{{ cat.image.url }}" alt="{{ cat.name }}">{% else %}<div class="category-placeholder">🛍️</div>{% endif %}</div>
+<div class="category-card-content"><h3>{{ cat.name }}</h3><span>{{ cat.product_count }} products</span>
+{% if cat.description %}<p>{{ cat.description|truncatechars:60 }}</p>{% endif %}
+</div>
+</a>
+{% empty %}<p>No categories found.</p>{% endfor %}
+</div></div>{% endblock %}

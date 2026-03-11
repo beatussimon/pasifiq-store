@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ store_name }}{% endblock %}</title>
+    <meta name="description"
+        content="{% block meta_description %}Premium products from the Pacific Islands{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ store_name }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Discover premium Pacific products{% endblock %}">
+    {% if request.user.is_authenticated %}
+    <meta name="user-wishlist" content="{{ wishlist_product_ids|join:',' }}">
+    <meta name="user-comparison" content="{{ comparison_product_ids|join:',' }}">
+    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        <div class="container">
+            <span>🌺 Welcome to {{ store_name }} — Quality Premium Products</span>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <header class="site-header">
+        <nav class="nav-container">
+            <div class="nav-logo">
+                <a href="{% url 'core:home' %}" class="nav-logo">
+                    <div class="logo-icon">🌊</div>
+                    <div class="logo-text">{{ store_name }}</div>
+                </a>
+            </div>
+
+            <form class="nav-search" action="{% url 'search_app:search' %}" method="GET">
+                <input type="text" name="q" placeholder="Search products..." class="search-input"
+                    value="{{ request.GET.q }}" id="searchInput" autocomplete="off">
+                <button type="submit" class="search-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                </button>
+            </form>
+
+            <div class="nav-actions">
+                <button id="themeToggle" class="nav-icon-btn" title="Toggle Theme">
+                    <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                    <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" style="display:none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+                {% if request.user.is_authenticated %}
+                {% if request.user.is_store_owner or request.user.is_superuser %}
+                <a href="{% url 'dashboard:index' %}" class="nav-link" title="Dashboard">
+                    Dashboard
+                    {% if unread_notifications > 0 %}<span class="badge">{{ unread_notifications }}</span>{% endif %}
+                </a>
+                {% endif %}
+                <a href="{% url 'comparison:view' %}" class="nav-icon-btn" title="Compare">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    {% if comparison_count > 0 %}<span class="badge">{{ comparison_count }}</span>{% endif %}
+                </a>
+                <a href="{% url 'wishlist:list' %}" class="nav-icon-btn" title="Wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                    {% if wishlist_count > 0 %}<span class="badge">{{ wishlist_count }}</span>{% endif %}
+                </a>
+                <div class="nav-dropdown">
+                    <a href="{% url 'users:profile' %}" class="nav-link">
+                        {{ request.user.username }} <span class="nav-chevron">▼</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-right">
+                        <a href="{% url 'users:profile' %}" class="dropdown-item">Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <form method="post" action="{% url 'users:logout' %}" id="logoutForm">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item text-accent">Logout</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'users:login' %}" class="nav-link">Login</a>
+                <a href="{% url 'users:register' %}" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+            </div>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span><span></span><span></span>
+            </button>
+        </nav>
+
+        <!-- Category Nav -->
+        {% if request.resolver_match.url_name != 'home' or request.resolver_match.namespace != 'core' %}
+        <div class="category-nav">
+            <div class="container">
+                <a href="{% url 'products:list' %}"
+                    class="category-nav-link {% if request.resolver_match.url_name == 'list' and not request.GET.category and not request.GET.status %}active{% endif %}">All
+                    Products</a>
+                {% load core_tags %}
+                {% get_nav_categories as nav_cats %}
+                {% for cat in nav_cats %}
+                <a href="{{ cat.get_absolute_url }}"
+                    class="category-nav-link {% if selected_category == cat.slug or category.slug == cat.slug %}active{% endif %}">{{
+                    cat.name }}</a>
+                {% endfor %}
+                <a href="{% url 'products:list' %}?status=available"
+                    class="category-nav-link {% if request.GET.status == 'available' %}active{% endif %}">Available</a>
+                <a href="{% url 'products:list' %}?sort=view_count"
+                    class="category-nav-link {% if request.GET.sort == 'view_count' %}active{% endif %}">Most
+                    Popular</a>
+            </div>
+        </div>
+        {% endif %}
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-inner">
+            <form action="{% url 'search_app:search' %}" method="GET" class="mobile-search-form">
+                <input type="text" name="q" placeholder="Search products..." class="form-input">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            <nav class="mobile-nav-links">
+                <a href="{% url 'core:home' %}">Home</a>
+                <a href="{% url 'products:list' %}">Products</a>
+                <a href="{% url 'categories:list' %}">Categories</a>
+                <a href="{% url 'comparison:view' %}">
+                    Compare{% if comparison_count > 0 %}({{ comparison_count }}){% endif %}
+                </a>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'wishlist:list' %}">Wishlist{% if wishlist_count > 0 %}({{ wishlist_count }}){% endif
+                    %}</a>
+                <a href="{% url 'users:profile' %}">Profile</a>
+                {% if request.user.is_store_owner or request.user.is_superuser %}
+                <a href="{% url 'dashboard:index' %}">Dashboard</a>
+                {% endif %}
+                {% else %}
+                <a href="{% url 'users:login' %}">Login</a>
+                <a href="{% url 'users:register' %}">Register</a>
+                {% endif %}
+                <a href="{% url 'core:contact' %}">Contact</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="flash-messages">
+        {% for message in messages %}
+        <div class="flash flash-{{ message.tags }}">
+            {{ message }}
+            <button onclick="this.parentElement.remove()">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="{% url 'core:home' %}" class="footer-logo">
+                        <div class="logo-icon">🌊</div>
+                        <div class="logo-text">{{ store_name }}</div>
+                    </a>
+                    <p class="footer-desc">{{ store_tagline|default:'Quality Pacific products delivery at your
+                        doorstep.' }}</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-btn">FB</a>
+                        <a href="#" class="social-btn">IG</a>
+                        <a href="#" class="social-btn">WA</a>
+                    </div>
+                </div>
+
+                <div class="footer-col collapsible-col">
+                    <h4 class="footer-heading">Quick Links <span class="footer-toggle">+</span></h4>
+                    <ul class="footer-list">
+                        <li><a href="{% url 'core:home' %}">Home</a></li>
+                        <li><a href="{% url 'products:list' %}">Shop All</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col collapsible-col">
+                    <h4 class="footer-heading">Categories <span class="footer-toggle">+</span></h4>
+                    <ul class="footer-list">
+                        {% for cat in categories|slice:":5" %}
+                        <li><a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="footer-col collapsible-col">
+                    <h4 class="footer-heading">Contact Us <span class="footer-toggle">+</span></h4>
+                    <div class="footer-contact footer-list">
+                        <div class="contact-item">📍 {{ store_address }}</div>
+                        <div class="contact-item">📞 {{ store_phone }}</div>
+                        <div class="contact-item">✉️ {{ store_email }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <a href="{% url 'core:robots_txt' %}">Robots.txt</a>
+                <p>&copy; {% now "Y" %} {{ store_name }}. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

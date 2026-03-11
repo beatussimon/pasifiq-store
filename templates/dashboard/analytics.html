@@ -1,0 +1,52 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">👁</div><div class="stat-info"><div class="stat-value">{{ total_views }}</div><div class="stat-label">Views (30 days)</div></div></div>
+    <div class="stat-card"><div class="stat-icon">✉️</div><div class="stat-info"><div class="stat-value">{{ total_inquiries }}</div><div class="stat-label">Inquiries (30 days)</div></div></div>
+    <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-info"><div class="stat-value">{{ total_registrations }}</div><div class="stat-label">New Users (30 days)</div></div></div>
+</div>
+
+<div class="panel">
+    <h3>Activity Over 30 Days</h3>
+    <canvas id="bigChart" height="80"></canvas>
+</div>
+
+<div class="panel">
+    <h3>Top Products by Views</h3>
+    <table class="data-table">
+        <thead><tr><th>Product</th><th>Views</th><th>Wishlist</th><th>Inquiries</th><th>Rating</th></tr></thead>
+        <tbody>
+            {% for p in top_products %}
+            <tr>
+                <td><a href="{{ p.get_absolute_url }}" target="_blank">{{ p.name }}</a></td>
+                <td>{{ p.view_count }}</td>
+                <td>{{ p.wishlist_count }}</td>
+                <td>{{ p.inquiry_count }}</td>
+                <td>{{ p.average_rating|floatformat:1 }}★</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('bigChart').getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: {{ chart_days|safe }},
+        datasets: [
+            { label: 'Views', data: {{ chart_views|safe }}, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, tension: 0.4 },
+            { label: 'Inquiries', data: {{ chart_inquiries|safe }}, borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.1)', fill: true, tension: 0.4 },
+            { label: 'Registrations', data: {{ chart_registrations|safe }}, borderColor: '#9333ea', backgroundColor: 'rgba(147,51,234,0.1)', fill: true, tension: 0.4 },
+        ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
+});
+</script>
+{% endblock %}

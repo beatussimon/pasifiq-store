@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Contact — {{ store_name }}{% endblock %}
+{% block content %}
+<div class="container contact-page">
+<div class="contact-grid">
+<div class="contact-info">
+<h1>Get In Touch</h1>
+<p>We love hearing from customers. Choose your preferred way to contact us.</p>
+<div class="contact-methods">
+<a href="tel:{{ store_phone }}" class="contact-method"><span class="cm-icon">📞</span><div><strong>Phone</strong><span>{{ store_phone }}</span></div></a>
+<a href="#" class="contact-method" id="contactWhatsApp"><span class="cm-icon">💬</span><div><strong>WhatsApp</strong><span>Chat with us directly</span></div></a>
+<a href="mailto:{{ store_email }}" class="contact-method"><span class="cm-icon">✉️</span><div><strong>Email</strong><span>{{ store_email }}</span></div></a>
+<div class="contact-method"><span class="cm-icon">📍</span><div><strong>Location</strong><span>{{ store_address }}</span></div></div>
+</div>
+</div>
+<div class="contact-form-wrap">
+<h2>Send a Message</h2>
+<form method="post" class="contact-form">
+{% csrf_token %}
+{% for field in form %}
+<div class="form-group"><label>{{ field.label }}{% if field.field.required %} *{% endif %}</label>{{ field }}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+{% endfor %}
+<button type="submit" class="btn btn-primary btn-full">Send Message</button>
+</form>
+</div>
+</div>
+</div>{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-header-left">
+            <form method="GET" class="search-form-inline">
+                <input type="text" name="q" value="{{ search }}" placeholder="Search products...">
+                <select name="status" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="available" {% if selected_status == 'available' %}selected{% endif %}>Available</option>
+                    <option value="sold" {% if selected_status == 'sold' %}selected{% endif %}>Sold</option>
+                    <option value="reserved" {% if selected_status == 'reserved' %}selected{% endif %}>Reserved</option>
+                </select>
+                <button type="submit" class="btn btn-sm">Filter</button>
+                {% if search or selected_status or selected_category %}<a href="{% url 'dashboard:product_list' %}" class="btn btn-sm btn-outline">Clear</a>{% endif %}
+            </form>
+        </div>
+        <a href="{% url 'dashboard:product_create' %}" class="btn btn-primary">+ Add Product</a>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Condition</th>
+                <th>Status</th>
+                <th>Price</th>
+                <th>Views</th>
+                <th>Featured</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>
+                    {% if product.primary_image %}
+                    <img src="{{ product.primary_image.image.url }}" alt="" class="table-thumb">
+                    {% else %}
+                    <div class="table-thumb-placeholder">🛍️</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ product.get_absolute_url }}" class="table-product-name" target="_blank">{{ product.name }}</a>
+                    {% if product.tags %}<div class="table-tags">{{ product.tags|truncatechars:40 }}</div>{% endif %}
+                </td>
+                <td>{{ product.category.name|default:"—" }}</td>
+                <td><span class="badge-condition badge-{{ product.condition }}">{{ product.get_condition_display }}</span></td>
+                <td><span class="badge-status badge-status-{{ product.status }}">{{ product.get_status_display }}</span></td>
+                <td>{% if product.price %}TZS {{ product.price|floatformat:0 }}{% else %}—{% endif %}</td>
+                <td>{{ product.view_count }}</td>
+                <td>
+                    <a href="{% url 'dashboard:toggle_featured' product.pk %}" class="featured-toggle {% if product.is_featured %}featured-on{% endif %}">
+                        {% if product.is_featured %}⭐{% else %}☆{% endif %}
+                    </a>
+                </td>
+                <td class="table-actions">
+                    <a href="{% url 'dashboard:product_edit' product.pk %}" class="btn btn-xs">Edit</a>
+                    <a href="{% url 'dashboard:product_images' product.pk %}" class="btn btn-xs btn-outline">Images</a>
+                    <a href="{% url 'dashboard:product_delete' product.pk %}" class="btn btn-xs btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="table-empty">No products found. <a href="{% url 'dashboard:product_create' %}">Add one now</a>.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if products.has_other_pages %}
+    <div class="pagination">
+        {% if products.has_previous %}<a href="?page={{ products.previous_page_number }}&q={{ search }}" class="page-btn">← Prev</a>{% endif %}
+        <span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+        {% if products.has_next %}<a href="?page={{ products.next_page_number }}&q={{ search }}" class="page-btn">Next →</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

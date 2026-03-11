@@ -1,0 +1,28 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Product Images{% endblock %}
+{% block page_title %}Images: {{ product.name }}{% endblock %}
+{% block content %}
+<div class="panel">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Upload New Images</label>
+            <input type="file" name="images" multiple accept="image/*" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+    <hr>
+    <div class="image-management-grid">
+        {% for image in product.images.all %}
+        <div class="manage-image">
+            <img src="{{ image.image.url }}" alt="">
+            {% if image.is_primary %}<span class="primary-badge">Primary</span>{% endif %}
+            <a href="{% url 'dashboard:delete_image' image.pk %}" class="delete-btn" onclick="return confirm('Delete?')">🗑️</a>
+        </div>
+        {% empty %}
+        <p>No images uploaded yet.</p>
+        {% endfor %}
+    </div>
+    <a href="{% url 'dashboard:product_edit' product.pk %}" class="btn btn-outline mt-2">← Back to Product</a>
+</div>
+{% endblock %}

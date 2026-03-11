@@ -1,0 +1,158 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ total_products }}</div>
+            <div class="stat-label">Total Products</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Registered Users</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">✉️</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ total_messages }}</div>
+            <div class="stat-label">Total Inquiries</div>
+        </div>
+    </div>
+    <div class="stat-card stat-card-alert">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ new_messages }}</div>
+            <div class="stat-label">New Messages</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3>Views & Inquiries (Last 7 Days)</h3>
+        <canvas id="activityChart" height="120"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3>Top 5 Viewed Products</h3>
+        <div class="top-list">
+            {% for product in top_viewed %}
+            <div class="top-list-item">
+                <div class="top-list-info">
+                    <a href="{{ product.get_absolute_url }}">{{ product.name|truncatechars:35 }}</a>
+                    <div class="top-list-bar" style="--pct: {% widthratio product.view_count top_viewed.0.view_count 100 %}%"></div>
+                </div>
+                <span class="top-list-count">{{ product.view_count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h3>Quick Actions</h3>
+    <div class="quick-actions-grid">
+        <a href="{% url 'dashboard:product_create' %}" class="quick-action-btn">
+            <span>➕</span>Add Product
+        </a>
+        <a href="{% url 'dashboard:message_list' %}?status=new" class="quick-action-btn">
+            <span>📬</span>New Messages ({{ new_messages }})
+        </a>
+        <a href="{% url 'dashboard:category_create' %}" class="quick-action-btn">
+            <span>📁</span>Add Category
+        </a>
+        <a href="{% url 'dashboard:analytics' %}" class="quick-action-btn">
+            <span>📊</span>Full Analytics
+        </a>
+    </div>
+</div>
+
+<!-- Two Column Bottom -->
+<div class="dashboard-cols">
+    <div class="dashboard-col">
+        <div class="panel">
+            <div class="panel-header">
+                <h3>Recent Messages</h3>
+                <a href="{% url 'dashboard:message_list' %}">View All</a>
+            </div>
+            {% for msg in recent_messages %}
+            <a href="{% url 'dashboard:message_detail' msg.pk %}" class="message-row {% if msg.status == 'new' %}unread{% endif %}">
+                <div class="message-row-info">
+                    <span class="message-sender">{{ msg.sender_name }}</span>
+                    {% if msg.product %}<span class="message-product">re: {{ msg.product.name|truncatechars:25 }}</span>{% endif %}
+                    <span class="message-preview">{{ msg.content|truncatechars:50 }}</span>
+                </div>
+                <span class="message-time">{{ msg.created_at|timesince }} ago</span>
+            </a>
+            {% empty %}
+            <div class="panel-empty">No messages yet</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="dashboard-col">
+        <div class="panel">
+            <div class="panel-header">
+                <h3>Most Wishlisted</h3>
+                <a href="{% url 'dashboard:product_list' %}">View All</a>
+            </div>
+            {% for product in top_wished %}
+            <div class="message-row">
+                <div class="message-row-info">
+                    <a href="{{ product.get_absolute_url }}" class="message-sender">{{ product.name|truncatechars:35 }}</a>
+                    <span class="message-preview">❤️ {{ product.wishlist_count }} wishlisted · {{ product.status }}</span>
+                </div>
+                <a href="{% url 'dashboard:product_edit' product.pk %}" class="btn btn-xs">Edit</a>
+            </div>
+            {% empty %}
+            <div class="panel-empty">No products yet</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('activityChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_days|safe }},
+        datasets: [
+            {
+                label: 'Views',
+                data: {{ chart_views|safe }},
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37,99,235,0.1)',
+                fill: true,
+                tension: 0.4,
+            },
+            {
+                label: 'Inquiries',
+                data: {{ chart_inquiries|safe }},
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(22,163,74,0.1)',
+                fill: true,
+                tension: 0.4,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+</script>
+{% endblock %}

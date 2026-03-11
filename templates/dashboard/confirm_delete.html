@@ -1,0 +1,16 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Confirm Delete{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+{% block content %}
+<div class="form-panel">
+    <h2>Delete "{{ product.name }}"?</h2>
+    <p>This action cannot be undone. All images and data for this product will be permanently deleted.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'dashboard:product_list' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
