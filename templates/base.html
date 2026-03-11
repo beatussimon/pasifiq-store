@@ -160,8 +160,9 @@
                     Compare{% if comparison_count > 0 %}({{ comparison_count }}){% endif %}
                 </a>
                 {% if request.user.is_authenticated %}
-                <a href="{% url 'wishlist:list' %}">Wishlist{% if wishlist_count > 0 %}({{ wishlist_count }}){% endif
-                    %}</a>
+                <a href="{% url 'wishlist:list' %}">Wishlist
+                    {% if wishlist_count > 0 %}({{ wishlist_count }}){% endif %}
+                </a>
                 <a href="{% url 'users:profile' %}">Profile</a>
                 {% if request.user.is_store_owner or request.user.is_superuser %}
                 <a href="{% url 'dashboard:index' %}">Dashboard</a>
